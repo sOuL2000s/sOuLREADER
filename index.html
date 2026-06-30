@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sOuL READER - All-in-One Document Suite</title>
+    <title>sOuLREADER - All-in-One Document Suite</title>
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     
     <!-- External Libraries (CDNs) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
         :root {
@@ -19,17 +22,30 @@
             --dark: #1e293b;
             --light: #f8fafc;
             --accent: #3b82f6;
+            --text-color: #334155;
+            --border-color: #e2e8f0;
+            --bg-secondary: #f1f5f9;
+            --shadow-light: rgba(0,0,0,0.05);
+            --shadow-medium: rgba(0,0,0,0.1);
+            --sidebar-width: 300px;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             background: var(--light);
             display: flex;
             flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            color: var(--text-color);
         }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-secondary); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
         /* Header */
         header {
@@ -39,153 +55,103 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px var(--shadow-medium);
+            position: relative;
+            z-index: 100;
         }
 
-        .logo { font-size: 1.5rem; font-weight: bold; letter-spacing: 2px; }
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; display: flex; align-items: center; gap: 0.5rem; }
+        .sidebar-toggle-btn { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; display: none; padding: 0.5rem; border-radius: 5px; transition: background 0.2s; }
+        .sidebar-toggle-btn:hover { background: rgba(255, 255, 255, 0.1); }
 
         /* Main Layout */
-        main {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        main { display: flex; flex: 1; overflow: hidden; }
 
-        /* Sidebar - File Explorer */
+        /* Sidebar */
         #sidebar {
-            width: 300px;
+            width: var(--sidebar-width);
             background: white;
-            border-right: 1px solid #e2e8f0;
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-        }
-
-        .tabs {
-            display: flex;
-            background: #f1f5f9;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-            border-bottom: 2px solid var(--primary);
-            font-weight: bold;
-            background: white;
-        }
-
-        .file-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
-
-        .file-item {
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-
-        .file-item:hover { background: #eff6ff; }
-        .file-item i { margin-right: 10px; color: #64748b; }
-
-        /* Viewer Area */
-        #viewer-container {
-            flex: 1;
-            background: #cbd5e1;
+            box-shadow: 2px 0 5px var(--shadow-light);
+            transition: transform 0.3s ease-in-out;
             position: relative;
-            display: flex;
-            flex-direction: column;
+            flex-shrink: 0;
         }
+        #sidebar.hidden { transform: translateX(-100%); position: absolute; height: 100%; z-index: 200; }
+        #sidebar .sidebar-header { display: none; justify-content: flex-end; padding: 0.5rem 1rem 0; }
+        #sidebar .close-sidebar-btn { background: none; border: none; color: var(--dark); font-size: 1.5rem; cursor: pointer; padding: 0.5rem; border-radius: 5px; }
 
-        #viewer-content {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-            overflow: auto;
-        }
+        .tabs { display: flex; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); }
+        .tabs .tab { flex: 1; padding: 12px 10px; text-align: center; cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; transition: all 0.2s; }
+        .tab.active { border-bottom: 2px solid var(--primary); font-weight: 600; background: white; color: var(--primary); }
 
-        /* Floating Progress Indicator */
-        #progress-overlay {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            pointer-events: none;
-        }
+        .file-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .file-item { padding: 10px; margin-bottom: 4px; border-radius: 5px; cursor: pointer; display: flex; align-items: center; font-size: 0.9rem; transition: background 0.2s; }
+        .file-item:hover { background: var(--bg-secondary); }
+        .file-item.active { background: var(--primary); color: white; }
+        .file-item.active i { color: white; }
+        .file-item i { margin-right: 10px; color: #64748b; font-size: 1.1em; }
 
-        /* Upload Area */
-        .upload-section {
-            padding: 15px;
-            border-top: 1px solid #e2e8f0;
-        }
+        /* Viewer */
+        #viewer-container { flex: 1; background: var(--bg-secondary); position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        #viewer-content { width: 100%; height: 100%; border: none; background: white; overflow: auto; padding: 20px; box-sizing: border-box; }
+        #viewer-content iframe, #viewer-content .img-wrapper, #viewer-content .media-wrapper, #viewer-content #epub-viewer { padding: 0; }
 
+        #progress-overlay { position: fixed; top: 10px; right: 20px; background: var(--dark); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.8rem; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 50; }
+        #progress-overlay.visible { opacity: 1; }
+
+        .upload-section { padding: 15px; border-top: 1px solid var(--border-color); }
         #file-input { display: none; }
-        .upload-btn {
-            background: var(--primary);
-            color: white;
-            padding: 10px;
-            width: 100%;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
+        .upload-btn { background: var(--primary); color: white; padding: 10px; width: 100%; border: none; border-radius: 5px; cursor: pointer; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 10px; }
 
-        /* Generic Content Wrappers */
-        .code-wrapper { padding: 20px; }
-        .img-wrapper { display: flex; justify-content: center; align-items: center; height: 100%; }
-        .img-wrapper img { max-width: 90%; max-height: 90%; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .media-wrapper { display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; }
-        .unsupported { padding: 50px; text-align: center; }
+        .code-wrapper pre { padding: 20px; margin: 0; background: #2d2d2d; color: #ccc; font-size: 0.9em; border-radius: 8px; overflow-x: auto; }
+        .content-text-wrapper { padding: 20px; line-height: 1.6; }
+        .img-wrapper { display: flex; justify-content: center; align-items: center; height: 100%; background: var(--bg-secondary); overflow: auto; }
+        .img-wrapper img { max-width: 100%; max-height: 100%; object-fit: contain; box-shadow: 0 5px 15px var(--shadow-medium); border-radius: 8px; }
+        .media-wrapper { display: flex; justify-content: center; align-items: center; height: 100%; flex-direction: column; gap: 20px; background: var(--bg-secondary); padding: 20px; box-sizing: border-box; }
+        .media-wrapper video, .media-wrapper audio { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 5px 15px var(--shadow-medium); }
+        .unsupported { padding: 50px 20px; text-align: center; color: var(--text-color); height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .unsupported a { color: var(--primary); text-decoration: none; font-weight: 500; }
 
-        /* Loader */
-        #loader {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
+        #loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; justify-content: center; align-items: center; background: rgba(255, 255, 255, 0.8); width: 100%; height: 100%; z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        #loader.show { opacity: 1; pointer-events: auto; }
+        #loader i { color: var(--primary); }
+
+        @media (max-width: 768px) {
+            .sidebar-toggle-btn { display: block; }
+            #sidebar { position: fixed; top: 0; left: 0; width: 80%; height: 100%; z-index: 200; box-shadow: 5px 0 15px var(--shadow-medium); }
+            #sidebar .sidebar-header { display: flex; }
+            main { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">
-            <img src="logo.svg" alt="sOuL READER Logo" style="height: 30px; vertical-align: middle; margin-right: 10px;">
-            sOuL READER
+        <div class="header-left">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle-btn"><i class="fas fa-bars"></i></button>
+            <div class="logo">
+                <img src="logo.svg" alt="sOuLREADER Logo" style="height: 30px; vertical-align: middle;">
+                sOuLREADER
+            </div>
         </div>
         <div id="file-title">Select a document to begin</div>
     </header>
 
     <main>
         <section id="sidebar">
+            <div class="sidebar-header">
+                <button class="close-sidebar-btn" id="close-sidebar-btn"><i class="fas fa-times"></i></button>
+            </div>
             <div class="tabs">
                 <div class="tab active" onclick="switchTab('cloud')">Cloud</div>
                 <div class="tab" onclick="switchTab('local')">My Uploads</div>
             </div>
-
             <div id="file-list-cloud" class="file-list"></div>
             <div id="file-list-local" class="file-list" style="display:none"></div>
-
             <div class="upload-section">
                 <label for="file-input" class="upload-btn">
                     <i class="fas fa-upload"></i> Upload Document
@@ -200,7 +166,7 @@
             <div id="viewer-content">
                 <div class="unsupported">
                     <i class="fas fa-file-import fa-5x" style="color: #cbd5e1; margin-bottom: 20px;"></i>
-                    <h2>Welcome to sOuL READER</h2>
+                    <h2>Welcome to sOuLREADER</h2>
                     <p>Select a file from the repository or upload one from your device.</p>
                 </div>
             </div>
@@ -213,22 +179,22 @@
         const fileTitle = document.getElementById('file-title');
         const progressOverlay = document.getElementById('progress-overlay');
         let currentFilePath = "";
+        let currentActiveFileItem = null;
 
-        // Initialize
         window.onload = () => {
             fetchCloudFiles();
             loadLocalLibrary();
-            
-            // Restore progress on scroll
             viewerContent.onscroll = function() {
                 if(!currentFilePath) return;
                 const progress = (viewerContent.scrollTop / (viewerContent.scrollHeight - viewerContent.clientHeight)) * 100;
                 progressOverlay.innerText = `Progress: ${Math.round(progress)}%`;
                 saveProgress(currentFilePath, viewerContent.scrollTop);
+                progressOverlay.classList.add('visible');
+                clearTimeout(this.scrollTimeout);
+                this.scrollTimeout = setTimeout(() => progressOverlay.classList.remove('visible'), 1500);
             };
+            setupSidebarToggles();
         };
-
-        // --- Data Fetching ---
 
         async function fetchCloudFiles() {
             try {
@@ -236,15 +202,12 @@
                 const files = await response.json();
                 const container = document.getElementById('file-list-cloud');
                 container.innerHTML = '';
-
                 files.forEach(file => {
                     if(file.type === 'file') {
-                        const div = createFileItem(file.name, file.download_url, true);
-                        container.appendChild(div);
+                        container.appendChild(createFileItem(file.name, file.download_url, true));
                     }
                 });
             } catch (e) {
-                console.error("Error fetching repo:", e);
                 document.getElementById('file-list-cloud').innerHTML = "Failed to load cloud files.";
             }
         }
@@ -254,26 +217,23 @@
             const div = document.createElement('div');
             div.className = 'file-item';
             div.innerHTML = `<i class="${getIcon(ext)}"></i> <span>${name}</span>`;
-            div.onclick = () => openFile(url, name, ext, isCloud);
+            div.onclick = () => {
+                if (currentActiveFileItem) currentActiveFileItem.classList.remove('active');
+                div.classList.add('active');
+                currentActiveFileItem = div;
+                openFile(url, name, ext, isCloud);
+                if (window.innerWidth <= 768) toggleSidebar(false);
+            };
             return div;
         }
-
-        // --- File Handling ---
 
         function handleFileUpload(event) {
             const files = event.target.files;
             const localData = JSON.parse(localStorage.getItem('local_files') || '[]');
-
             Array.from(files).forEach(file => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const fileObj = {
-                        name: file.name,
-                        data: e.target.result, // Base64 for local persistence
-                        type: file.type,
-                        lastRead: new Date().getTime()
-                    };
-                    localData.push(fileObj);
+                    localData.push({ name: file.name, data: e.target.result, type: file.type, lastRead: Date.now() });
                     localStorage.setItem('local_files', JSON.stringify(localData));
                     loadLocalLibrary();
                 };
@@ -284,36 +244,36 @@
         function loadLocalLibrary() {
             const container = document.getElementById('file-list-local');
             container.innerHTML = '';
-            const localData = JSON.parse(localStorage.getItem('local_files') || '[]');
-            
-            localData.forEach(file => {
-                const div = createFileItem(file.name, file.data, false);
-                container.appendChild(div);
+            JSON.parse(localStorage.getItem('local_files') || '[]').forEach(file => {
+                container.appendChild(createFileItem(file.name, file.data, false));
             });
         }
-
-        // --- Viewer Logic ---
 
         function openFile(url, name, ext, isCloud) {
             currentFilePath = name;
             fileTitle.innerText = name;
             viewerContent.innerHTML = '';
-            document.getElementById('loader').style.display = 'block';
+            document.getElementById('loader').classList.add('show');
 
-            // Extension Categories
-            const textExts = ['txt', 'rtf', 'md', 'tex', 'msg', 'json', 'xml', 'yaml', 'yml', 'sql', 'ini', 'conf', 'env'];
-            const codeExts = ['html', 'htm', 'css', 'scss', 'js', 'jsx', 'ts', 'tsx', 'php', 'asp', 'c', 'cpp', 'h', 'hpp', 'java', 'py', 'rb', 'go', 'rs', 'swift', 'kt', 'sh', 'bat', 'cmd', 'com'];
-            const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'heic', 'ico', 'svg', 'ai', 'eps'];
+            const textExts = ['txt', 'rtf', 'csv', 'tsv', 'tex', 'msg', 'json', 'xml', 'yaml', 'yml', 'sql', 'ini', 'conf', 'env'];
+            const codeExts = ['html', 'htm', 'css', 'scss', 'js', 'jsx', 'ts', 'tsx', 'php', 'asp', 'c', 'cpp', 'h', 'hpp', 'java', 'py', 'rb', 'go', 'rs', 'swift', 'kt', 'sh', 'bat', 'cmd', 'com']; 
+            const imgExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'webp', 'heic', 'ico'];
+            const vectorExts = ['svg', 'ai', 'eps'];
             const videoExts = ['mp4', 'mkv', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v', '3gp', 'mpeg', 'mpg'];
             const audioExts = ['mp3', 'aac', 'ogg', 'm4a', 'wma', 'opus', 'wav', 'flac', 'alac', 'aiff'];
-            const officeExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'ods', 'odt', 'odp'];
+            const officeExts = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'ods', 'odt', 'odp', 'wpd', 'pages', 'numbers', 'xlsm', 'key', 'pps', 'ppsx'];
+            const ebookExts = ['epub', 'mobi', 'azw3'];
 
             setTimeout(async () => {
                 try {
                     if (ext === 'pdf') {
                         viewerContent.innerHTML = `<iframe src="${url}" width="100%" height="100%"></iframe>`;
                     } 
-                    else if (imgExts.includes(ext)) {
+                    else if (ext === 'md') {
+                        const resp = await (isCloud ? fetch(url) : Promise.resolve({text: () => Promise.resolve(atob(url.split(',')[1]))}));
+                        viewerContent.innerHTML = `<div class="content-text-wrapper">${marked.parse(await resp.text())}</div>`;
+                    }
+                    else if (imgExts.includes(ext) || ext === 'svg') {
                         viewerContent.innerHTML = `<div class="img-wrapper"><img src="${url}"></div>`;
                     }
                     else if (videoExts.includes(ext)) {
@@ -322,72 +282,52 @@
                     else if (audioExts.includes(ext)) {
                         viewerContent.innerHTML = `<div class="media-wrapper"><i class="fas fa-music fa-4x"></i><br><audio controls autoplay><source src="${url}"></audio></div>`;
                     }
-                    else if (ext === 'md') {
-                        const resp = await fetch(url);
-                        const txt = await resp.text();
-                        viewerContent.innerHTML = `<div class="code-wrapper">${marked.parse(txt)}</div>`;
-                    }
-                    else if (textExts.includes(ext) || codeExts.includes(ext)) {
-                        const resp = await fetch(url);
-                        const txt = await resp.text();
-                        const safeTxt = txt.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                        viewerContent.innerHTML = `<pre class="code-wrapper"><code class="language-${ext}">${safeTxt}</code></pre>`;
-                        Prism.highlightAllUnder(viewerContent);
-                    }
-                    else if (officeExts.includes(ext)) {
-                        if(isCloud) {
-                            // Use Google Docs Viewer for cloud Office files
-                            const googleUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
-                            viewerContent.innerHTML = `<iframe src="${googleUrl}" width="100%" height="100%"></iframe>`;
-                        } else {
-                            viewerContent.innerHTML = `<div class="unsupported"><h3>Local Office Preview</h3><p>Direct browser viewing for local Office files (${ext}) is restricted for security. Please use Cloud version or a dedicated editor.</p></div>`;
-                        }
-                    }
                     else if (ext === 'epub') {
                         viewerContent.innerHTML = `<div id="epub-viewer" style="height:100%"></div>`;
-                        const book = ePub(url);
-                        const rendition = book.renderTo("epub-viewer", { width: "100%", height: "100%" });
-                        rendition.display();
+                        ePub(url).renderTo("epub-viewer", { width: "100%", height: "100%" }).display();
+                    }
+                    else if (textExts.includes(ext) || codeExts.includes(ext)) {
+                        const resp = await (isCloud ? fetch(url) : Promise.resolve({text: () => Promise.resolve(atob(url.split(',')[1]))}));
+                        const txt = (await resp.text()).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        viewerContent.innerHTML = `<pre class="code-wrapper"><code class="language-${ext}">${txt}</code></pre>`;
+                        Prism.highlightAllUnder(viewerContent);
+                    }
+                    else if (officeExts.includes(ext) && isCloud) {
+                        viewerContent.innerHTML = `<iframe src="https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true" width="100%" height="100%"></iframe>`;
                     }
                     else {
-                        viewerContent.innerHTML = `<div class="unsupported"><h3>Type: .${ext}</h3><p>This file type is supported for storage, but direct viewing is not available in the browser. <br><br> <a href="${url}" download style="color:var(--primary)">Download File</a></p></div>`;
+                        throw new Error(`File type .${ext} viewing not supported directly.`);
                     }
-
-                    // Restore Scroll Progress
-                    const savedPos = localStorage.getItem(`progress_${name}`);
-                    if(savedPos) viewerContent.scrollTop = savedPos;
-
+                    viewerContent.scrollTop = localStorage.getItem(`progress_${name}`) || 0;
                 } catch (err) {
-                    viewerContent.innerHTML = `<div class="unsupported">Error loading file: ${err.message}</div>`;
+                    viewerContent.innerHTML = `<div class="unsupported"><i class="fas fa-exclamation-triangle fa-5x" style="color:#ef4444;margin-bottom:20px"></i><h3>Unsupported or Error</h3><p>${err.message}</p><br><a href="${url}" download>Download File</a></div>`;
                 }
-                document.getElementById('loader').style.display = 'none';
+                document.getElementById('loader').classList.remove('show');
             }, 100);
         }
 
-        // --- Helpers ---
-
         function getIcon(ext) {
-            if(['pdf'].includes(ext)) return 'fas fa-file-pdf text-red-500';
-            if(['jpg','png','svg','webp'].includes(ext)) return 'fas fa-file-image';
-            if(['mp4','mkv','mov'].includes(ext)) return 'fas fa-file-video';
-            if(['mp3','wav','ogg'].includes(ext)) return 'fas fa-file-audio';
-            if(['zip','rar','7z'].includes(ext)) return 'fas fa-file-archive';
-            if(['doc','docx'].includes(ext)) return 'fas fa-file-word';
-            if(['xls','xlsx'].includes(ext)) return 'fas fa-file-excel';
-            if(['ppt','pptx'].includes(ext)) return 'fas fa-file-powerpoint';
-            return 'fas fa-file-alt';
+            const icons = { pdf:'pdf', doc:'word', docx:'word', xls:'excel', xlsx:'excel', ppt:'powerpoint', pptx:'powerpoint', epub:'book', mp3:'audio', mp4:'video', zip:'archive', js:'code', py:'code' };
+            return `fas fa-file-${icons[ext] || 'alt'}`;
         }
 
         function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.innerText.toLowerCase().includes(tab)));
             document.getElementById('file-list-cloud').style.display = tab === 'cloud' ? 'block' : 'none';
             document.getElementById('file-list-local').style.display = tab === 'local' ? 'block' : 'none';
         }
 
-        function saveProgress(name, pos) {
-            localStorage.setItem(`progress_${name}`, pos);
+        function toggleSidebar(show) {
+            document.getElementById('sidebar').classList.toggle('hidden', !show);
         }
+
+        function setupSidebarToggles() {
+            document.getElementById('sidebar-toggle-btn').onclick = () => toggleSidebar(true);
+            document.getElementById('close-sidebar-btn').onclick = () => toggleSidebar(false);
+            if (window.innerWidth <= 768) toggleSidebar(false);
+        }
+
+        function saveProgress(name, pos) { localStorage.setItem(`progress_${name}`, pos); }
     </script>
 </body>
 </html>
